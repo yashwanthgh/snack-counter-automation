@@ -6,7 +6,7 @@
 
 Diagrams (draw.io): [system setup and states](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Fsnack-counter.drawio), [full flowchart](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Frefill-flowchart.drawio). Code: [github.com/yashwanthgh/snack-counter-automation](https://github.com/yashwanthgh/snack-counter-automation)
 
-**Proof:** 43 automated tests, including the brief's three: two people can't both commit to one refill, an unfinished refill is handed on, and totals are right across both currencies.
+**Proof:** 43 automated tests, including the brief's three: two people can't both commit to one refill, an unfinished refill is handed on, and totals are right across both currencies. Every rule in full, with why we chose it: [Rules and decisions](https://github.com/yashwanthgh/snack-counter-automation/blob/main/docs/RULES-AND-DECISIONS.md). The code in plain words: [Walkthrough](https://github.com/yashwanthgh/snack-counter-automation/blob/main/WALKTHROUGH.md).
 
 ## Your problems and how we fix them
 
