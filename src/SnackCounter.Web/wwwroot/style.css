@@ -1,0 +1,99 @@
+/* Shared look for both pages. Colours are tokens, redefined for dark mode below. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --text: #1f2937; --muted: #6b7280; --line: #e5e7eb; --soft: #f3f4f6;
+  --accent: #2563eb; --accent-text: #ffffff; --accent-soft: #eff4ff;
+  --bot: #eef2ff; --system: #f3f4f6; --contact: #fff7e6;
+  --ok: #15803d; --ok-bg: #dcfce7; --bad: #b91c1c; --bad-bg: #fee2e2; --warn: #a16207; --warn-bg: #fef3c7;
+  --info: #1d4ed8; --info-bg: #dbeafe; --grey-bg: #e5e7eb; --grey: #374151;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111418; --panel: #1a1e25; --text: #e5e7eb; --muted: #9ca3af; --line: #2a303a; --soft: #222831;
+    --accent: #3b82f6; --accent-soft: #1c2740;
+    --bot: #1e2742; --system: #222831; --contact: #362c19;
+    --ok: #86efac; --ok-bg: #14532d; --bad: #fca5a5; --bad-bg: #7f1d1d; --warn: #fde68a; --warn-bg: #713f12;
+    --info: #bfdbfe; --info-bg: #1e3a8a; --grey-bg: #374151; --grey: #e5e7eb;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Header */
+header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line); }
+header h1 { font-size: 15px; margin: 0; }
+header .clock { font-variant-numeric: tabular-nums; color: var(--muted); }
+header .spacer { flex: 1; }
+.group { display: inline-flex; align-items: center; gap: 4px; }
+.group .label { font-size: 12px; color: var(--muted); margin-right: 2px; }
+
+/* Controls */
+button { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); cursor: pointer; }
+button:hover { border-color: var(--accent); color: var(--accent); }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); color: var(--accent-text); }
+button.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+button.ghost:hover { color: var(--accent); background: var(--soft); }
+input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); min-width: 0; }
+input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Panels */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.summary { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+.group-title { font-weight: 600; font-size: 13px; margin: 14px 0 4px; }
+.empty { color: var(--muted); padding: 16px 0; text-align: center; }
+
+/* Pills: refill and claim states, and people badges */
+.pill, .badge { display: inline-block; font-size: 11px; line-height: 18px; padding: 0 8px; border-radius: 9px; font-weight: 600; white-space: nowrap; }
+.Reimbursed, .Approved, .badge.vol { background: var(--ok-bg); color: var(--ok); }
+.ClaimRejected, .Rejected, .Escalated, .badge.away { background: var(--bad-bg); color: var(--bad); }
+.Offered, .Committed, .Pending, .badge.visit { background: var(--warn-bg); color: var(--warn); }
+.Filled, .Claimed, .badge.adm { background: var(--info-bg); color: var(--info); }
+.badge.reg, .Waiting { background: var(--grey-bg); color: var(--grey); }
+.state-note { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Chat messages */
+.msg { padding: 8px 12px; border-radius: 10px; margin: 6px 0; white-space: pre-wrap; word-break: break-word; }
+.msg .meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.msg .meta b { color: var(--text); font-weight: 600; }
+.msg.user { background: transparent; border: 1px solid var(--line); }
+.msg.bot { background: var(--bot); }
+.msg.contact { background: var(--contact); }
+.msg.system { background: var(--system); font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1px solid var(--line); }
+.legend .l-bot::before { background: var(--bot); }
+.legend .l-contact::before { background: var(--contact); }
+.legend .l-system::before { background: var(--system); }
+
+/* Refill history */
+details summary { cursor: pointer; font-size: 12px; color: var(--muted); }
+details summary:hover { color: var(--accent); }
+.timeline { list-style: none; margin: 8px 0 4px 4px; padding: 0 0 0 14px; border-left: 2px solid var(--line); }
+.timeline li { position: relative; margin: 0 0 8px; padding-left: 6px; }
+.timeline li::before { content: ""; position: absolute; left: -20px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--panel); border: 2px solid var(--accent); }
+.timeline .when { display: block; font-size: 11px; color: var(--muted); }
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: -4px -4px 12px; overflow-x: auto; }
+.tabs button { border: none; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--muted); padding: 8px 12px; white-space: nowrap; }
+.tabs button:hover { color: var(--text); }
+.tabs button.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tabs .count { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 9px; background: var(--soft); color: var(--muted); font-size: 11px; line-height: 16px; text-align: center; }
+.tab-body { display: none; }
+.tab-body.on { display: block; }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr !important; } }

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snack Test Console</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; padding: 16px; align-items: start; }
+  .chat { display: flex; flex-direction: column; height: calc(100vh - 90px); min-height: 480px; }
+  #log { flex: 1; overflow-y: auto; padding-right: 4px; }
+  .composer { border-top: 1px solid var(--line); margin: 10px -14px -14px; padding: 12px 14px; background: var(--soft); border-radius: 0 0 10px 10px; }
+  .composer .hint { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  .row { display: flex; gap: 6px; margin-top: 8px; }
+  .row input { flex: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍿 Snack counter · test console</h1>
+  <span class="clock" id="now"></span>
+  <span class="group"><span class="label">Move time</span>
+    <button onclick="send('time +30m')">+30 min</button>
+    <button onclick="send('time +2h')">+2 h</button>
+    <button onclick="send('time +1d')">+1 day</button>
+  </span>
+  <span class="spacer"></span>
+  <button class="ghost" onclick="send('status')">status</button>
+  <button class="ghost" onclick="send('report')">report</button>
+  <button class="ghost" onclick="send('help')">help</button>
+  <a href="person.html" target="_blank">Open person chat ↗</a>
+</header>
+
+<div class="grid">
+  <section class="panel chat">
+    <h2>Chat: everything that happens</h2>
+    <div class="legend">
+      <span>someone typed</span>
+      <span class="l-bot">bot → one person</span>
+      <span class="l-contact">bot → office contact</span>
+      <span class="l-system">simulator answer</span>
+    </div>
+    <div id="log"></div>
+    <div class="composer">
+      <p class="hint">Act as someone: pick a person and press a button, as if they typed it.</p>
+      <div class="chips">
+        <select id="who"></select>
+        <button onclick="as('empty')">empty</button>
+        <button onclick="as('yes')">yes</button>
+        <button onclick="as('no')">no</button>
+        <button onclick="asDone()">done…</button>
+        <button onclick="as('away 3')">away 3 days</button>
+      </div>
+      <form class="row" onsubmit="event.preventDefault(); send(cmd.value); cmd.value='';">
+        <input id="cmd" placeholder="Any command, e.g.  anna: done 850 chips, cola" autocomplete="off">
+        <button class="primary">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel">
+    <nav class="tabs" id="tabs">
+      <button data-tab="refills" onclick="showTab('refills')">Refills<span class="count" id="c-refills"></span></button>
+      <button data-tab="budgets" onclick="showTab('budgets')">Budget</button>
+      <button data-tab="report" onclick="showTab('report')">Monthly report</button>
+      <button data-tab="hr" onclick="showTab('hr')">HR claims<span class="count" id="c-hr"></span></button>
+      <button data-tab="people" onclick="showTab('people')">People<span class="count" id="c-people"></span></button>
+    </nav>
+    <div class="tab-body" id="t-refills"><div id="refills"></div></div>
+    <div class="tab-body" id="t-budgets"><div id="budgets"></div></div>
+    <div class="tab-body" id="t-report"><div id="report"></div></div>
+    <div class="tab-body" id="t-hr">
+      <div class="chips" style="margin-bottom:10px"><button onclick="send('hr down')">Make HR fail the next claim</button>
+        <span class="muted" style="font-size:12px">to test the retry</span></div>
+      <div id="claims"></div>
+    </div>
+    <div class="tab-body" id="t-people"><div id="people"></div></div>
+  </section>
+</div>
+
+<script>
+// Small helpers. The server does all the work; this page only shows state and sends commands.
+var lastLogCount = -1;
+var lastRefillsKey = '';
+
+// Which refill histories the tester has opened. Updated when you click, so redraws can't close them.
+var openHistories = {};
+document.addEventListener('toggle', function (event) {
+  var box = event.target;
+  if (box.tagName === 'DETAILS' && box.getAttribute('data-id')) openHistories[box.getAttribute('data-id')] = box.open;
+}, true);
+var names = {}; // id -> display name, e.g. bjorn -> Bjørn
+
+function nameOf(id) { return names[id] || id; }
+
+// Replace ids like "bjorn" with names like "Bjørn" in a sentence.
+function withNames(text) {
+  return text.replace(/\b([a-z]+)\b/g, function (w) { return names[w] || w; });
+}
+
+function esc(text) {
+  var d = document.createElement('div');
+  d.textContent = text == null ? '' : String(text);
+  return d.innerHTML;
+}
+
+function send(line) {
+  if (!line || !line.trim()) return;
+  fetch('/api/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ line: line }) })
+    .then(function (r) { return r.json(); })
+    .then(render);
+}
+
+function as(text) { send(document.getElementById('who').value + ': ' + text); }
+
+function asDone() {
+  var answer = prompt('Amount and items, e.g.  850 chips, cola\n(optional: add  receipt:kiwi.pdf  at the end)');
+  if (answer) as('done ' + answer);
+}
+
+function showTab(name) {
+  var buttons = document.querySelectorAll('#tabs button');
+  for (var i = 0; i < buttons.length; i++) buttons[i].className = buttons[i].getAttribute('data-tab') === name ? 'on' : '';
+  var bodies = document.querySelectorAll('.tab-body');
+  for (var j = 0; j < bodies.length; j++) bodies[j].className = bodies[j].id === 't-' + name ? 'tab-body on' : 'tab-body';
+  try { localStorage.setItem('tab', name); } catch (e) {}
+}
+var startTab = 'refills';
+try { startTab = localStorage.getItem('tab') || 'refills'; } catch (e) {}
+showTab(startTab);
+
+// Plain words for each state, so nobody has to know the state names.
+function stateNote(r) {
+  var who = nameOf(r.assignedTo);
+  if (r.state === 'Offered') return 'waiting for ' + who + ' to answer';
+  if (r.state === 'Committed') return who + ' is buying';
+  if (r.state === 'Filled') return 'box filled, sending claim to HR';
+  if (r.state === 'Claimed') return 'waiting for HR approval';
+  if (r.state === 'Reimbursed') return 'done, money paid back';
+  if (r.state === 'ClaimRejected') return 'HR rejected the claim';
+  if (r.state === 'Escalated') return 'nobody to ask, office contact told';
+  if (r.state === 'Waiting') return 'office closed, someone is asked when it opens';
+  return '';
+}
+
+function pill(state) { return '<span class="pill ' + esc(state) + '">' + esc(state) + '</span>'; }
+
+function render(s) {
+  document.getElementById('now').textContent = s.now + ' UTC · answer within ' + s.acceptMinutes + ' min · finish within ' + s.completeHours + ' h';
+
+  names = {};
+  for (var z = 0; z < s.people.length; z++) names[s.people[z].id] = s.people[z].name;
+
+  // Person picker (keep the current choice).
+  var who = document.getElementById('who');
+  if (who.options.length !== s.people.length) {
+    var html = '';
+    for (var i = 0; i < s.people.length; i++) html += '<option value="' + esc(s.people[i].id) + '">' + esc(s.people[i].name) + '</option>';
+    who.innerHTML = html;
+  }
+
+  // Chat log: only redraw when something new arrived, then scroll to the bottom.
+  if (s.log.length !== lastLogCount) {
+    lastLogCount = s.log.length;
+    var out = '';
+    for (var j = 0; j < s.log.length; j++) {
+      var m = s.log[j];
+      var cls = m.kind;
+      var label;
+      if (m.kind === 'user') label = '👤 <b>' + esc(nameOf(m.from)) + '</b> wrote';
+      else if (m.kind === 'bot' && m.to.indexOf('contact:') === 0) { cls = 'contact'; label = '🤖 Snack bot → <b>' + esc(m.to.substring(8)) + ' office contact</b>'; }
+      else if (m.kind === 'bot') label = '🤖 Snack bot → <b>' + esc(nameOf(m.to)) + '</b> (only ' + esc(nameOf(m.to)) + ' sees this)';
+      else label = 'ℹ️ Simulator answer';
+      var text = m.kind === 'user' ? m.text.substring(m.text.indexOf(':') + 1).trim() : m.text;
+      if (m.kind === 'user' && m.from === 'tester') text = m.text;
+      out += '<div class="msg ' + cls + '"><div class="meta">' + esc(m.time) + ' UTC · ' + label + '</div>' + esc(text) + '</div>';
+    }
+    var log = document.getElementById('log');
+    log.innerHTML = out || '<p class="empty">Nothing yet. Pick a person below and press "empty".</p>';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // Refills, newest first, with their history behind a click.
+  // Remember which histories are open, so the redraw every 1.5 s does not close them.
+  var open = openHistories;
+  var rows = '';
+  for (var k = s.refills.length - 1; k >= 0; k--) {
+    var r = s.refills[k];
+    var steps = '';
+    for (var h = 0; h < r.history.length; h++) {
+      var line = r.history[h];
+      var cut = line.indexOf(' UTC: ');
+      var when = cut > 0 ? line.substring(0, cut) + ' UTC' : '';
+      var what = cut > 0 ? line.substring(cut + 6) : line;
+      steps += '<li><span class="when">' + esc(when) + '</span>' + esc(withNames(what)) + '</li>';
+    }
+    rows += '<tr><td><b>' + esc(r.id) + '</b><div class="muted">' + esc(r.office) + '</div></td>'
+      + '<td>' + pill(r.state) + '<span class="state-note">' + esc(stateNote(r)) + '</span></td>'
+      + '<td>' + (r.deadline ? esc(r.deadline) : '<span class="muted">-</span>') + '</td>'
+      + '<td class="num">' + (r.amount ? esc(r.amount) : '<span class="muted">-</span>') + '</td></tr>'
+      + '<tr><td colspan="4" style="padding-top:0"><details data-id="' + esc(r.id) + '"' + (open[r.id] ? ' open' : '') + '><summary>History (' + r.history.length + ' steps)</summary>'
+      + '<ol class="timeline">' + steps + '</ol></details></td></tr>';
+  }
+  // Only redraw when something changed; redrawing closes an open history in some browsers.
+  var refillsHtml = rows
+    ? '<table><tr><th>Refill</th><th>State</th><th>Deadline (UTC)</th><th class="num">Claimed</th></tr>' + rows + '</table>'
+    : '<p class="empty">No refills yet. Report a box empty from the chat on the left.</p>';
+  var refillsKey = JSON.stringify(s.refills);
+  document.getElementById('c-refills').textContent = s.refills.length || '';
+  if (refillsKey !== lastRefillsKey) {
+    lastRefillsKey = refillsKey;
+    document.getElementById('refills').innerHTML = refillsHtml;
+  }
+
+  var b = '<p class="summary">Spent counts at purchase. It splits into waiting for HR and approved. A rejected claim is given back.</p>'
+    + '<table><tr><th>Office</th><th class="num">Monthly</th><th class="num">Spent</th><th class="num">Waiting for HR</th><th class="num">Approved</th><th class="num">Left</th><th>Typical buy</th></tr>';
+  for (var n = 0; n < s.budgets.length; n++) {
+    var x = s.budgets[n];
+    b += '<tr><td><b>' + esc(x.office) + '</b></td><td class="num">' + esc(x.monthly) + '</td><td class="num">' + esc(x.spent) + '</td><td class="num">' + esc(x.pending) + '</td><td class="num">' + esc(x.approved) + '</td><td class="num"><b>' + esc(x.remaining) + '</b></td><td class="muted">' + esc(x.typical) + '</td></tr>';
+  }
+  document.getElementById('budgets').innerHTML = b + '</table>';
+
+  // Monthly report: per office, combined total, who bought what, item counts.
+  var rp = s.report;
+  var rh = '<div class="summary">' + esc(rp.month) + ' (updates live)</div><table><tr><th>Office</th><th>Budget</th><th>Spent</th><th>Left</th><th>Refills</th></tr>';
+  for (var ro = 0; ro < rp.offices.length; ro++) {
+    var of = rp.offices[ro];
+    rh += '<tr><td>' + esc(of.office) + '</td><td>' + esc(of.budget) + '</td><td>' + esc(of.spent) + '</td><td>' + esc(of.remaining) + '</td><td>' + of.refills + '</td></tr>';
+  }
+  var rates = [];
+  for (var cur in rp.rates) rates.push('1 ' + cur + ' = ' + rp.rates[cur]);
+  rh += '</table><p><b>All offices together: ' + esc(rp.combined) + '</b> <span class="muted">(using ' + esc(rates.join(', ')) + ')</span></p>';
+  if (rp.purchases.length > 0) {
+    rh += '<div class="group-title">Who bought what</div><table><tr><th>When (UTC)</th><th>Who</th><th>Office</th><th>Amount</th><th>Items</th></tr>';
+    for (var pu = 0; pu < rp.purchases.length; pu++) {
+      var x2 = rp.purchases[pu];
+      rh += '<tr><td>' + esc(x2.when) + '</td><td>' + esc(nameOf(x2.employee)) + '</td><td>' + esc(x2.office) + '</td><td>' + esc(x2.amount) + '</td><td>' + esc(x2.items) + '</td></tr>';
+    }
+    rh += '</table>';
+  } else {
+    rh += '<p class="empty">Nothing bought this month yet.</p>';
+  }
+  var itemList = [];
+  for (var it in rp.items) itemList.push(it + ' × ' + rp.items[it]);
+  if (itemList.length > 0) rh += '<p><span class="muted">Items bought:</span> ' + esc(itemList.join(', ')) + '</p>';
+  document.getElementById('report').innerHTML = rh;
+
+  var c = '';
+  for (var p = 0; p < s.claims.length; p++) {
+    var cl = s.claims[p];
+    var actions = cl.status === 'Pending'
+      ? '<button onclick="send(\'hr approve ' + esc(cl.id) + '\')">Approve</button> <button onclick="reject(\'' + esc(cl.id) + '\')">Reject</button>'
+      : '';
+    c += '<tr><td>' + esc(cl.id) + '</td><td>' + esc(nameOf(cl.employee)) + '</td><td>' + esc(cl.amount) + '<div class="muted">🧾 ' + esc(cl.receipt) + '</div></td><td>' + pill(cl.status) + '</td><td>' + actions + '</td></tr>';
+  }
+  document.getElementById('claims').innerHTML = c
+    ? '<table><tr><th>Claim</th><th>Who</th><th>Amount</th><th>Status</th><th></th></tr>' + c + '</table>'
+    : '<p class="empty">No claims yet. A claim appears when someone sends "done".</p>';
+  var pending = 0;
+  for (var pc = 0; pc < s.claims.length; pc++) if (s.claims[pc].status === 'Pending') pending++;
+  document.getElementById('c-hr').textContent = pending || '';
+
+  // People, grouped by where they are working right now.
+  var groups = {};
+  var order = [];
+  var away = [];
+  var vols = 0;
+  for (var q = 0; q < s.people.length; q++) {
+    var e = s.people[q];
+    if (e.isVolunteer) vols++;
+    if (!e.available) { away.push(e); continue; }
+    if (!groups[e.currentOffice]) { groups[e.currentOffice] = []; order.push(e.currentOffice); }
+    groups[e.currentOffice].push(e);
+  }
+  var pe = '<div class="summary">' + s.people.length + ' people · ' + vols + ' volunteers · ' + (s.people.length - vols) + ' regular · '
+    + away.length + ' away. Only volunteers who are in the office are asked to refill.</div>';
+  for (var g = 0; g < order.length; g++) {
+    pe += '<div class="group-title">Working in ' + esc(order[g]) + ' now (' + groups[order[g]].length + ')</div>' + peopleTable(groups[order[g]]);
+  }
+  if (away.length > 0) pe += '<div class="group-title">Away: holiday, sick or working from home (' + away.length + ')</div>' + peopleTable(away);
+  document.getElementById('people').innerHTML = pe;
+  document.getElementById('c-people').textContent = s.people.length;
+}
+
+function peopleTable(list) {
+  var t = '<table><tr><th>Name</th><th>Type</th><th>Home office</th><th>Status</th><th>Refills done</th></tr>';
+  for (var i = 0; i < list.length; i++) {
+    var e = list[i];
+    var type = e.isVolunteer ? '<span class="badge vol">Volunteer</span>' : '<span class="badge reg">Regular</span>';
+    if (e.isAdmin) type += ' <span class="badge adm">Admin</span>';
+    var status;
+    if (!e.available) status = '<span class="badge away">Away until ' + esc(e.awayUntil) + '</span>';
+    else if (e.currentOffice !== e.homeOffice) status = '<span class="badge visit">Visiting ' + esc(e.currentOffice) + ' until ' + esc(e.visitingUntil) + '</span>';
+    else status = 'In home office';
+    t += '<tr><td><a href="person.html?id=' + encodeURIComponent(e.id) + '" target="_blank">' + esc(e.name) + '</a></td><td>' + type + '</td><td>'
+      + esc(e.homeOffice) + '</td><td>' + status + '</td><td>' + e.refillsDone + '</td></tr>';
+  }
+  return t + '</table>';
+}
+
+function reject(id) {
+  var reason = prompt('Reason for rejecting ' + id + '?', 'receipt unreadable');
+  if (reason !== null) send('hr reject ' + id + ' ' + reason);
+}
+
+function refresh() {
+  fetch('/api/state').then(function (r) { return r.json(); }).then(render).catch(function () {});
+}
+refresh();
+setInterval(refresh, 1500); // other pages (person chats) may have sent something
+</script>
+</body>
+</html>

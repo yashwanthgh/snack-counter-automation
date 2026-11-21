@@ -1,0 +1,19 @@
+[
+  { "id": "anna",    "name": "Anna",    "homeOffice": "Oslo",      "isVolunteer": true },
+  { "id": "bjorn",   "name": "Bjørn",   "homeOffice": "Oslo",      "isVolunteer": true },
+  { "id": "sofie",   "name": "Sofie",   "homeOffice": "Oslo",      "isVolunteer": true },
+  { "id": "ingrid",  "name": "Ingrid",  "homeOffice": "Oslo",      "isVolunteer": true,  "awayUntil": "2026-11-09T09:00:00Z" },
+  { "id": "maja",    "name": "Maja",    "homeOffice": "Oslo",      "isVolunteer": true,  "awayUntil": "2026-11-04T09:00:00Z" },
+  { "id": "henrik",  "name": "Henrik",  "homeOffice": "Oslo",      "isVolunteer": true,  "visitingOffice": "Bengaluru", "visitingUntil": "2026-11-13T09:00:00Z" },
+  { "id": "lars",    "name": "Lars",    "homeOffice": "Oslo",      "isVolunteer": false, "isAdmin": true },
+  { "id": "erik",    "name": "Erik",    "homeOffice": "Oslo",      "isVolunteer": false },
+  { "id": "nora",    "name": "Nora",    "homeOffice": "Oslo",      "isVolunteer": false },
+  { "id": "priya",   "name": "Priya",   "homeOffice": "Bengaluru", "isVolunteer": true },
+  { "id": "rahul",   "name": "Rahul",   "homeOffice": "Bengaluru", "isVolunteer": true },
+  { "id": "neha",    "name": "Neha",    "homeOffice": "Bengaluru", "isVolunteer": true },
+  { "id": "vikram",  "name": "Vikram",  "homeOffice": "Bengaluru", "isVolunteer": true,  "awayUntil": "2026-11-06T09:00:00Z" },
+  { "id": "kavya",   "name": "Kavya",   "homeOffice": "Bengaluru", "isVolunteer": true,  "visitingOffice": "Oslo", "visitingUntil": "2026-11-16T09:00:00Z" },
+  { "id": "deepa",   "name": "Deepa",   "homeOffice": "Bengaluru", "isVolunteer": false, "isAdmin": true },
+  { "id": "arjun",   "name": "Arjun",   "homeOffice": "Bengaluru", "isVolunteer": false },
+  { "id": "sneha",   "name": "Sneha",   "homeOffice": "Bengaluru", "isVolunteer": false }
+]

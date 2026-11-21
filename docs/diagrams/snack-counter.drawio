@@ -1,0 +1,210 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="arch" name="1. How it runs (AWS)">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Snack Counter: how it would run for real" style="text;html=1;fontSize=20;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sub" value="Three parts on AWS: one Lambda, one table, one timer. People and claims are borrowed from HR; we only keep the refill state and the spending." style="text;html=1;fontSize=12;fontColor=#555555;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="58" width="1000" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="people" value="&lt;b&gt;Employees&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;empty, yes, no,&lt;br&gt;done + receipt&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="235" width="40" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="chat" value="&lt;b&gt;Slack / Teams&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="180" y="235" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="mgmt" value="&lt;b&gt;Management&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;or any system&lt;br&gt;that wants the report&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="470" width="40" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aws" value="AWS (our service)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#FF9900;fontColor=#FF9900;fontStyle=1;verticalAlign=top;align=left;spacingLeft=10;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="390" y="140" width="520" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="apigw" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;POST /chat&lt;br&gt;POST /hr&lt;br&gt;GET /report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="420" y="225" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda" value="&lt;b&gt;1 Lambda (.NET 8)&lt;/b&gt;&lt;br&gt;today's rules:&lt;br&gt;RefillService, VolunteerSelector,&lt;br&gt;BudgetService, ReportService&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;only 1 copy runs at a time&lt;br&gt;(so two &quot;yes&quot; can't race)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="650" y="210" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ddb" value="&lt;b&gt;DynamoDB&lt;/b&gt;&lt;br&gt;refills (state, who was asked,&lt;br&gt;deadline, history)&lt;br&gt;spending ledger&lt;br&gt;refills done (fairness)&lt;br&gt;budgets + timers" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=12;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="665" y="430" width="190" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="timer" value="&lt;b&gt;EventBridge timer&lt;/b&gt;&lt;br&gt;every 1 minute&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;calls Tick(): checks the&lt;br&gt;30 min / 24 h deadlines,&lt;br&gt;retries HR&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="420" y="430" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hr" value="&lt;b&gt;HR system&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;claims, approve / reject&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="990" y="190" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="dir" value="&lt;b&gt;People directory&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;office, volunteer,&lt;br&gt;away, visiting&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="990" y="300" width="170" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="types" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="people" target="chat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="webhook" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="chat" target="apigw">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="run" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="apigw" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="read / save" style="endArrow=classic;startArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="lambda" target="ddb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="every minute" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=1;exitY=0;entryX=0;entryY=1;" edge="1" parent="1" source="timer" target="lambda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="send claim&lt;br&gt;(same key on retry)" style="endArrow=classic;html=1;fontSize=11;exitX=1;exitY=0.25;entryX=0;entryY=0.5;" edge="1" parent="1" source="lambda" target="hr">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="approved / rejected&lt;br&gt;(webhook to POST /hr)" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=0.5;exitY=0;entryX=0.5;entryY=0;" edge="1" parent="1" source="hr" target="apigw">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1075" y="160" />
+              <mxPoint x="490" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="who can be asked?" style="endArrow=classic;html=1;fontSize=11;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="lambda" target="dir">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="private messages (chat API)" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=0.5;exitY=0;entryX=0.5;entryY=0;" edge="1" parent="1" source="lambda" target="chat">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="110" />
+              <mxPoint x="250" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" value="GET /report?month=2026-11" style="endArrow=classic;html=1;fontSize=11;exitX=1;exitY=0.5;entryX=0;entryY=0.75;" edge="1" parent="1" source="mgmt" target="apigw">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="505" />
+              <mxPoint x="360" y="292" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="note" value="&lt;b&gt;Cost:&lt;/b&gt; about $0-1 a month at our load (a few hundred messages). One always-on container would be about $10, a Kubernetes cluster $75+.&lt;br&gt;&lt;br&gt;&lt;b&gt;Today's submission&lt;/b&gt; runs the same rules in one process, in memory: a lock instead of &quot;1 copy at a time&quot;, Tick() in a loop instead of the timer, simulators instead of Slack and HR. Moving to AWS changes no rules: only the chat, HR, clock and storage classes." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffde7;strokeColor=#d6b656;align=left;spacing=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="950" y="420" width="300" height="190" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram id="states" name="2. Refill steps">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="A refill, from &quot;empty&quot; to &quot;reimbursed&quot;" style="text;html=1;fontSize=20;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="start" value="" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="60" y="215" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="off" value="&lt;b&gt;Offered&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;one volunteer asked,&lt;br&gt;30 min to answer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="180" y="190" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="com" value="&lt;b&gt;Committed&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;said yes, told the limit,&lt;br&gt;24 h to buy&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="440" y="190" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fil" value="&lt;b&gt;Filled&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;receipt in, spending counted,&lt;br&gt;claim being sent&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="700" y="190" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cla" value="&lt;b&gt;Claimed&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;waiting for HR&lt;br&gt;(1-10 days)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="970" y="190" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="rei" value="&lt;b&gt;Reimbursed&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;money paid back&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="110" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="rej" value="&lt;b&gt;ClaimRejected&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;money given back to budget,&lt;br&gt;contact helps the buyer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="280" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="esc" value="&lt;b&gt;Escalated&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#666666&quot;&gt;nobody left to ask, or no budget:&lt;br&gt;office contact decides&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="300" y="440" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a0" value="someone reports &quot;empty&quot;&lt;br&gt;(only one open refill per office)" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="start" target="off">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a1" value="yes&lt;br&gt;(first yes wins)" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="off" target="com">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="done + receipt&lt;br&gt;(capped at the limit)" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="com" target="fil">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" value="HR took the claim" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="fil" target="cla">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3b" value="HR down:&lt;br&gt;retry, same key" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=0.75;exitY=0;entryX=0.25;entryY=0;" edge="1" parent="1" source="fil" target="fil">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="827" y="140" />
+              <mxPoint x="742" y="140" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a4" value="approved" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="cla" target="rei">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" value="rejected" style="endArrow=classic;html=1;fontSize=11;" edge="1" parent="1" source="cla" target="rej">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" value="no / no answer in 30 min:&lt;br&gt;ask the next fair person" style="endArrow=classic;html=1;fontSize=11;exitX=0.25;exitY=0;entryX=0.75;entryY=0;" edge="1" parent="1" source="off" target="off">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="130" />
+              <mxPoint x="300" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a7" value="not done in 24 h:&lt;br&gt;buyer told &quot;don't buy&quot;,&lt;br&gt;next person asked" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" edge="1" parent="1" source="com" target="off">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="340" />
+              <mxPoint x="260" y="340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a8" value="nobody left to ask" style="endArrow=classic;html=1;fontSize=11;exitX=0;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="1" source="off" target="esc">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a9" value="yes, but budget is 0" style="endArrow=classic;html=1;fontSize=11;exitX=0.25;exitY=1;entryX=1;entryY=0.5;" edge="1" parent="1" source="com" target="esc">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="400" />
+              <mxPoint x="560" y="400" />
+              <mxPoint x="560" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="a10" value="reported empty again:&lt;br&gt;start the list again" style="endArrow=classic;html=1;fontSize=11;dashed=1;exitX=0.5;exitY=1;entryX=0;entryY=0.75;" edge="1" parent="1" source="esc" target="off">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="570" />
+              <mxPoint x="110" y="570" />
+              <mxPoint x="110" y="250" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="legend" value="&lt;b&gt;Colours&lt;/b&gt;&lt;br&gt;yellow = a person is working on it&lt;br&gt;blue = with HR&lt;br&gt;green = finished&lt;br&gt;red = a person must decide" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cccccc;align=left;spacing=10;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="700" y="440" width="240" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

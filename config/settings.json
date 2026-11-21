@@ -1,0 +1,19 @@
+{
+  "timers": {
+    "acceptWindowMinutes": 30,
+    "completeWindowHours": 3,
+    "fairnessWindowDays": 90
+  },
+  "officeHours": [
+    { "office": "Oslo",      "timeZone": "Europe/Oslo",  "openHour": 10, "closeHour": 17, "workDays": ["Mon", "Tue", "Wed", "Thu", "Fri"] },
+    { "office": "Bengaluru", "timeZone": "Asia/Kolkata", "openHour": 10, "closeHour": 17, "workDays": ["Mon", "Tue", "Wed", "Thu", "Fri"] }
+  ],
+  "budgets": [
+    { "office": "Oslo",      "currency": "NOK", "monthlyBudget": 6000,  "typicalPurchaseMin": 300, "typicalPurchaseMax": 1200 },
+    { "office": "Bengaluru", "currency": "INR", "monthlyBudget": 15000, "typicalPurchaseMin": 500, "typicalPurchaseMax": 3000 }
+  ],
+  "report": {
+    "combinedCurrency": "NOK",
+    "rates": { "NOK": 1, "INR": 0.13 }
+  }
+}
