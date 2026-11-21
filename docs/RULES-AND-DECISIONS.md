@@ -13,6 +13,7 @@ We always picked **safe and simple** over fast and clever. The decisions that ma
 | 30 minutes to answer, 3 office hours to buy, "no" allowed any time before "done" | The box never waits on one person for long | [7](#rule-7), [10](#rule-10), [10b](#rule-10b) |
 | The bot only messages people 10:00-17:00, Mon-Fri, office time | Nobody is asked at night or at the weekend | [11](#rule-11) |
 | The buyer is told how much they can spend when they say yes | No overspending, and no approval step that blocks the box | [14](#rule-14) |
+| Visitors: a purchase counts against the office it was bought for, in that office's currency. HR pays the buyer back in their own home currency | Each office's budget stays correct, and nobody loses money when they buy abroad | [12](#rule-12), [18](#rule-18) |
 | The money is claimed from HR automatically, and never twice | Nobody forgets to claim, and nobody is paid twice | [19](#rule-19), [20](#rule-20) |
 | The budget goes down at purchase, and back up if HR rejects | The budget left is always up to date | [22b](#rule-22b) |
 | People report "empty" and "done"; there is no sensor | Cheap and simple, but a false report is possible (HR checks receipts) | [16b](#rule-16b) |
