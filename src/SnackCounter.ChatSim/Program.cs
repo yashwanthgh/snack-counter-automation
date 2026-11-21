@@ -5,7 +5,6 @@ namespace SnackCounter.ChatSim;
 
 // Chat simulator: type messages as different people and watch the bot react.
 // Run:  dotnet run --project src/SnackCounter.ChatSim
-// Or feed a script:  dotnet run --project src/SnackCounter.ChatSim < demo.txt
 // Optional argument: the config folder (default "config").
 public class Program
 {

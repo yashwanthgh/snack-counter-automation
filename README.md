@@ -23,7 +23,6 @@ Requires the .NET 8 SDK.
 ```bash
 dotnet test                                              # all tests
 dotnet run --project src/SnackCounter.ChatSim            # interactive chat simulator (type 'help')
-dotnet run --project src/SnackCounter.ChatSim < demo.txt # scripted demo
 ```
 
 ## Layout
