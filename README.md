@@ -7,6 +7,15 @@ Code walkthrough in plain words: `WALKTHROUGH.md`.
 
 Budgets, timers and exchange rates are in `config/settings.json`; people and their status (away, visiting) in `config/people.json`. Nothing is hard-coded.
 
+## Diagrams
+
+Click a link to open the diagram in the draw.io viewer (no install needed):
+
+- [System setup and refill states](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Fsnack-counter.drawio): how it runs on AWS, and every state a refill can be in.
+- [Full flowchart](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Frefill-flowchart.drawio): every case, from "empty" to reimbursed.
+
+The source files are in [docs/diagrams/](docs/diagrams/).
+
 ## Run
 
 Requires the .NET 8 SDK.
