@@ -3,6 +3,7 @@
 Core logic for keeping the Oslo and Bengaluru snack counters stocked: who refills, when it's handed on, the budget check, the HR reimbursement claim, and the monthly report. The chat tool and the HR system are simulated.
 
 Design document: [docs/DESIGN.md](docs/DESIGN.md), also as a [Google Doc](https://docs.google.com/document/d/1fzKB-0a8-dthGGJdXy9Zcb41dY2eLs7tCuCtF2GH2ag/edit?usp=sharing) (assumptions, trade-offs, what is deliberately not built).
+Every rule and why we chose it: [docs/RULES-AND-DECISIONS.md](docs/RULES-AND-DECISIONS.md) (key decisions at the top, full detail one click away).
 Code walkthrough in plain words: `WALKTHROUGH.md`.
 
 Budgets, timers and exchange rates are in `config/settings.json`; people and their status (away, visiting) in `config/people.json`. Nothing is hard-coded.
