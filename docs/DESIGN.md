@@ -2,9 +2,11 @@
 
 **Background:** the Oslo and Bengaluru offices each have a snack box, refilled by hand today. When it runs out, nobody knows who should buy it. This causes the problems listed in the table below.
 
-**The idea:** when the box is empty, a chat bot picks one fair person to buy snacks. That person spends within the budget and sends "done". The bot claims the money from HR. One round of this (box empty, someone buys, they get paid back) is called a refill.
+**The idea:** automate the coordination, not the buying. One named person at a time, a spending limit told up front, and the claim sent automatically. When the box is empty, a chat bot picks one fair person; they buy within the limit and send "done"; the bot claims the money from HR. People already use chat and HR already pays, so this fixes all four problems with no new hardware or apps. One round of this is called a refill.
 
 Diagrams (draw.io): [system setup and states](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Fsnack-counter.drawio), [full flowchart](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2Fyashwanthgh%2Fsnack-counter-automation%2Fmain%2Fdocs%2Fdiagrams%2Frefill-flowchart.drawio). Code: [github.com/yashwanthgh/snack-counter-automation](https://github.com/yashwanthgh/snack-counter-automation)
+
+**Proof:** 43 automated tests, including the brief's three: two people can't both commit to one refill, an unfinished refill is handed on, and totals are right across both currencies.
 
 ## Your problems and how we fix them
 
@@ -22,7 +24,7 @@ Diagrams (draw.io): [system setup and states](https://app.diagrams.net/#Uhttps%3
 ## The flow, from empty to reimbursed
 
 1. Someone sends "empty" or "low": a refill opens (Offered: waiting for a yes), the fairest person is asked.  
-2. That person replies **yes** (Committed: they will buy) and hears the spending limit. No, or no answer: next person.  
+2. That person replies **yes** (Committed: they will buy) and hears the limit. No, or no answer: next person.  
 3. They buy, then send **"done 245 chips, nuts"** (Filled: box is full). The spend is recorded at once.  
 4. The bot sends the claim to HR (Claimed: waiting for HR).  
 5. HR approves it (**Reimbursed**) or rejects it (**ClaimRejected**, and the money goes back into the budget).
@@ -34,9 +36,8 @@ Side states: **Escalated** means nobody could be asked or there is no budget, an
 * **The bot** runs each refill from empty to paid. It remembers state, buyer, who was asked, deadline, history.  
 * **Fair picker** chooses the next person in that office today and willing to help, using their refill history.  
 * **Budget** keeps each office's monthly budget and every purchase, in whole øre/paise (no rounding errors).  
-* **A monthly report** is built from those purchases.  
-* **Office hours** are set per office, in its own time zone.  
-* **Outside systems are kept separate:** chat, HR and the people directory. Here they are simulated, so the real ones can be plugged in later without changing the rules.  
+* **A monthly report** is built from those purchases; office hours are per office, in local time.  
+* **Kept separate:** chat, HR, people directory. Simulated here; real ones plug in later.  
 * **Settings** (budgets, timers, hours) live in a file, not in the code. Admins can change them from chat.  
 * **A timer** checks every minute for missed deadlines, and retries HR if it was down.
 
@@ -44,7 +45,7 @@ In production this would run on AWS, using pay-per-use parts: API Gateway (recei
 
 ## Trade-offs
 
-* **People report "empty" and "done"; there is no sensor.** Cheap, no hardware. A false "empty" is stopped when the person asked replies "full"; HR's receipt check stops fake claims. A weight sensor is a later upgrade.  
+* **People report "empty" and "done"; there is no sensor.** A false "empty" is stopped when the person asked replies "full"; HR's receipt check stops fake claims. A weight sensor can come later.  
 * **The amount the buyer types is trusted.** HR checks it against the receipt, and it is capped by the limit.  
 * **Spend is counted at "done", not when HR approves.** Budget is right at once; a rejection adds it back.  
 * **Snacks are free text.** Easy, but "crisps" and "chips" count as different snacks; a fixed list would be better.  
