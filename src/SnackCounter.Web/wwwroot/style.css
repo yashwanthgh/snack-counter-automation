@@ -60,7 +60,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .ClaimRejected, .Rejected, .Escalated, .badge.away { background: var(--bad-bg); color: var(--bad); }
 .Offered, .Committed, .Pending, .badge.visit { background: var(--warn-bg); color: var(--warn); }
 .Filled, .Claimed, .badge.adm { background: var(--info-bg); color: var(--info); }
-.badge.reg, .Waiting { background: var(--grey-bg); color: var(--grey); }
+.badge.reg, .Waiting, .NotNeeded { background: var(--grey-bg); color: var(--grey); }
 .state-note { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 /* Chat messages */

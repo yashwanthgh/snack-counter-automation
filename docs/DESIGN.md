@@ -10,19 +10,19 @@ Diagrams (draw.io): [system setup and states](https://app.diagrams.net/#Uhttps%3
 
 | Problem in the brief | How it is prevented |
 | :---- | :---- |
-| Two people buy at the same time | Each office has only one open refill. A second "empty" report joins the open refill. Only the first "yes" wins (checked inside a lock); later answers get "already taken". |
+| Two people buy at the same time | Each office has only one open refill. A second "empty" report joins the open refill. Only the first "yes" wins (checked in a lock); later ones get "already taken". |
 | The same few people always do it | Fair order: the person with the fewest refills in the last 90 days is asked first. If two people are tied, the one who refilled longest ago goes first. |
 | People are away, travelling or visiting | Only people who are in that office today and willing to help are asked. A visitor's purchase counts against the office they bought for, and HR pays them back in their payroll currency. |
 | The box sits empty because everyone assumes someone else will refill it | Anyone sends "empty" in chat, and the bot asks one named person, so it is never "someone else". They have 30 minutes to answer, then the next person is asked. If nobody is left, the office contact is told. |
 | Someone says yes and then forgets | They have 3 office hours to buy and get one nudge. After that, or if they reply "no", the next person is asked. |
 | Overspending | At "yes" the buyer is told the money left this month. The claim cannot go above it. If no budget is left, nobody is asked and the contact is told. |
-| People wait weeks for their money, or forget to claim | The claim (amount, currency, description, receipt image, employee id) is sent to HR the moment they say "done", so the wait is only HR's 1–10 days. Each claim carries the refill's id, so HR ignores a copy sent twice. If HR is down, the bot retries later. |
-| Nobody knows the spend or which snacks get eaten | One monthly report: each office in its own currency plus one combined total for management, budget left, every purchase (when, who, how much, items), and a count of each snack. |
+| People wait weeks for their money, or forget to claim | The claim (amount, currency, description, receipt image, employee id) is sent to HR the moment they say "done", so the wait is only HR's 1–10 days. Each claim carries the refill's id, so HR ignores a copy sent twice. |
+| Nobody knows the spend or which snacks get eaten | One monthly report: each office in its own currency plus one combined total for management, budget left, every purchase (when, who, how much, what) and a count per snack. |
 
 ## The flow, from empty to reimbursed
 
-1. Someone sends **"empty"**. A refill is opened (Offered: waiting for a yes) and the fairest person is asked.  
-2. That person replies **yes** (Committed: they will buy) and is told the spending limit. On no, or no answer, the next person is asked.  
+1. Someone sends "empty" or "low": a refill opens (Offered: waiting for a yes), the fairest person is asked.  
+2. That person replies **yes** (Committed: they will buy) and hears the spending limit. No, or no answer: next person.  
 3. They buy, then send **"done 245 chips, nuts"** (Filled: box is full). The spend is recorded at once.  
 4. The bot sends the claim to HR (Claimed: waiting for HR).  
 5. HR approves it (**Reimbursed**) or rejects it (**ClaimRejected**, and the money goes back into the budget).
@@ -44,7 +44,7 @@ In production this would run on AWS, using pay-per-use parts: API Gateway (recei
 
 ## Trade-offs
 
-* **People report "empty" and "done"; there is no sensor.** Cheap, no hardware. But a fake claim or a false "empty" is possible. HR checking the receipt is the safety net. A weight sensor is a later upgrade.  
+* **People report "empty" and "done"; there is no sensor.** Cheap, no hardware. A false "empty" is stopped when the person asked replies "full"; HR's receipt check stops fake claims. A weight sensor is a later upgrade.  
 * **The amount the buyer types is trusted.** HR checks it against the receipt, and it is capped by the limit.  
 * **Spend is counted at "done", not when HR approves.** Budget is right at once; a rejection adds it back.  
 * **Snacks are free text.** Easy, but "crisps" and "chips" count as different snacks; a fixed list would be better.  
@@ -62,12 +62,13 @@ Real chat or HR connections, a database, login, reading receipts automatically (
 | One snack box per office | The brief talks about one box. More boxes is a small change. |
 | A monthly budget in the office's own currency, not carried over | The brief describes a monthly budget. Carry-over is a finance decision, not ours. |
 | HR approves claims and checks receipts | HR already does this. We should not copy that work. |
-| The people directory says who is in which office and willing to help | We should not own staff data. We only read it. |
-| 30 min to answer, 3 office hours to buy | Fair to the buyer, but the box isn't empty all day. Changeable from chat. |
+| People set "away" or "visiting" in chat, with an end date | No leave calendar was named. A real one can replace it later. |
+| 30 min to answer, 3 office hours to buy | Fair to the buyer, but the box isn't empty all day. |
 | Office hours: 10–17 local, Mon–Fri | We should not message people at night or at the weekend. |
 | The reporter can also be asked to buy | They are already at the box. The fair order still spreads the work. |
-| Anyone can say "no" before "done" | It is better to know early than to wait for a timeout. |
 | Only admins change budgets and timers | Money settings need control. |
 | Chat gives us the sender's id | So we trust the sender id and need no extra login. |
 
 **Questions for you:** Should a rejected claim be resubmitted automatically? Are there public holidays per office? Should unspent budget carry over? Is there one box per office, or could there be more?
+
+**Changed since my email**: the budget is a limit told at "yes", not a soft limit with approval (waiting for approval could leave the box empty for days), and the time to buy is 3 office hours, not the next working day.

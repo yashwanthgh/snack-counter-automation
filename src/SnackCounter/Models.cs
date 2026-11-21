@@ -22,7 +22,8 @@ public enum RefillState
     Reimbursed,     // HR approved; done
     ClaimRejected,  // HR rejected; volunteer and office contact told, handled by people
     Escalated,      // nobody available; office contact told
-    Waiting         // reported while the office is closed; someone is asked when it opens
+    Waiting,        // reported while the office is closed; someone is asked when it opens
+    NotNeeded       // the person asked checked the box and it was full: nothing to buy
 }
 
 // The possible answers when someone says "yes".

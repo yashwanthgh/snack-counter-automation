@@ -16,7 +16,7 @@ We always picked **safe and simple** over fast and clever. The decisions that ma
 | Visitors: a purchase counts against the office it was bought for, in that office's currency. HR pays the buyer back in their own home currency | Each office's budget stays correct, and nobody loses money when they buy abroad | [12](#rule-12), [18](#rule-18) |
 | The money is claimed from HR automatically, and never twice | Nobody forgets to claim, and nobody is paid twice | [19](#rule-19), [20](#rule-20) |
 | The budget goes down at purchase, and back up if HR rejects | The budget left is always up to date | [22b](#rule-22b) |
-| People report "empty" and "done"; there is no sensor | Cheap and simple, but a false report is possible (HR checks receipts) | [16b](#rule-16b) |
+| People report "empty" and "done"; there is no sensor. The person asked can reply "full" if the box is not empty | Cheap and simple. A false "empty" is closed by "full"; a fake claim is caught by HR's receipt check | [16b](#rule-16b) |
 
 **Build first before real use:** holidays per office, a real database, real away/visiting data, real chat and HR connections, and a weight sensor under each box.
 
@@ -32,7 +32,7 @@ Two reasons come up often in "Why not": this is a take-home task with a deadline
 <details>
 <summary><b>1.</b> Only one open refill per office</summary>
 
-**Rule:** If the Oslo box is already being handled, a second "empty" report does NOT create a second refill. The same refill is returned.
+**Rule:** If the Oslo box is already being handled, a second "empty" report does NOT create a second refill. The same refill is returned. "low" (running low) works exactly like "empty": it starts a refill early, and a later "empty" joins that same refill.
 
 **Why:** The brief's main problem is "two people buy at the same time". Two open refills for one box = two people asked = two people may buy.
 
@@ -361,7 +361,7 @@ Two reasons come up often in "Why not": this is a take-home task with a deadline
 - A fake claim is possible: someone sends a real receipt but the snacks never reach the box (taken home). HR only sees the receipt, not the box.
 - A false "empty": the box is full, but someone reports it empty anyway (by mistake or as a joke). A refill starts and money may be spent on snacks that were not needed.
 
-What limits the damage today: only one refill per office can be open, the person asked can see the box and say "no", only the person who said yes can claim, the claim is capped at the spending limit, and HR can reject.
+What limits the damage today: only one refill per office can be open, the person asked can look at the box and reply "full" (the refill is closed and nothing is bought), only the person who said yes can claim, the claim is capped at the spending limit, and HR can reject.
 
 **Better way?:** A weight sensor under the snack box.
 
@@ -617,7 +617,7 @@ Without a sensor, a cheaper option: after "done", ask one other person in the of
 - **SnackCounter.HrSim**: fake HR
 - **SnackCounter.ChatSim**: terminal chat, loading config, admin commands
 - **SnackCounter.Web**: the two web pages (test console, one person's chat)
-- **SnackCounter.Tests**: 41 automated tests
+- **SnackCounter.Tests**: 43 automated tests
 
 **Why:** The rules can be read and tested on their own. Simulators can be thrown away when real systems are connected.
 

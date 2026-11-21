@@ -111,7 +111,7 @@ function render(s) {
   // Quick replies (none for an office contact: they only receive).
   var quick = '';
   if (!isContact()) {
-    var words = ['empty', 'yes', 'no', 'done 850 chips, cola', 'away 3'];
+    var words = ['empty', 'low', 'yes', 'no', 'full', 'done 850 chips, cola', 'away 3'];
     for (var w = 0; w < words.length; w++) quick += '<button onclick="say(\'' + words[w] + '\')">' + words[w] + '</button>';
   }
   document.getElementById('quick').innerHTML = quick;

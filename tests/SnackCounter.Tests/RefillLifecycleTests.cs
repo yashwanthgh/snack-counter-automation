@@ -24,6 +24,46 @@ public class RefillLifecycleTests : TestBase
     }
 
     [Test]
+    public void Running_low_starts_a_refill_and_a_later_empty_joins_it()
+    {
+        AddVolunteer("anna", Office.Oslo);
+        RefillService service = CreateService();
+
+        // "low" asks someone straight away, just like "empty".
+        Refill refill = service.ReportEmpty(Office.Oslo, "x", runningLow: true);
+        Assert.That(refill.State, Is.EqualTo(RefillState.Offered));
+        Assert.That(refill.AssignedTo, Is.EqualTo("anna"));
+        Assert.That(refill.History[0], Does.Contain("running low"));
+
+        // When it then runs out, the same refill is used, not a second one.
+        Refill again = service.ReportEmpty(Office.Oslo, "y");
+        Assert.That(again.Id, Is.EqualTo(refill.Id));
+        Assert.That(service.GetRefills().Count, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Person_asked_can_say_the_box_is_full_and_nothing_is_bought()
+    {
+        AddVolunteer("anna", Office.Oslo);
+        AddVolunteer("bjorn", Office.Oslo);
+        RefillService service = CreateService();
+        Refill refill = service.ReportEmpty(Office.Oslo, "x");
+
+        // Anna is asked, looks at the box, and it is full: a false "empty".
+        service.Decline(refill.Id, "anna", boxIsFull: true);
+
+        Assert.That(refill.State, Is.EqualTo(RefillState.NotNeeded));
+        Assert.That(refill.AssignedTo, Is.Null);
+        Assert.That(Chat.WasTold("bjorn", ""), Is.False);   // nobody else is asked
+        Assert.That(Chat.WasTold("anna", "box is full"), Is.True);
+        Assert.That(service.Accept(refill.Id, "anna"), Is.EqualTo(AcceptResult.AlreadyTaken));
+
+        // When the box really runs out later, a new refill starts.
+        Refill next = service.ReportEmpty(Office.Oslo, "y");
+        Assert.That(next.Id, Is.Not.EqualTo(refill.Id));
+    }
+
+    [Test]
     public void Fifty_simultaneous_yes_replies_only_one_wins()
     {
         AddVolunteer("anna", Office.Oslo);

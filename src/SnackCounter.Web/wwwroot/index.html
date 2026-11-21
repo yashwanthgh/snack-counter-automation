@@ -46,8 +46,10 @@
       <div class="chips">
         <select id="who"></select>
         <button onclick="as('empty')">empty</button>
+        <button onclick="as('low')">low</button>
         <button onclick="as('yes')">yes</button>
         <button onclick="as('no')">no</button>
+        <button onclick="as('full')">full</button>
         <button onclick="asDone()">done…</button>
         <button onclick="as('away 3')">away 3 days</button>
       </div>
@@ -140,6 +142,7 @@ function stateNote(r) {
   if (r.state === 'ClaimRejected') return 'HR rejected the claim';
   if (r.state === 'Escalated') return 'nobody to ask, office contact told';
   if (r.state === 'Waiting') return 'office closed, someone is asked when it opens';
+  if (r.state === 'NotNeeded') return 'box was checked and is full, nothing bought';
   return '';
 }
 

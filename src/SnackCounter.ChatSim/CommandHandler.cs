@@ -66,10 +66,11 @@ public class CommandHandler
         DateTimeOffset now = _clock.GetNow();
         string command = w[0].ToLowerInvariant();
 
-        if (command == "empty")
+        if (command == "empty" || command == "low")
         {
-            Refill r = _refills.ReportEmpty(person.CurrentOffice(now), person.EmployeeId);
-            Say(person.Name + " reported the " + r.Office + " box empty (" + r.ShortId() + ", " + r.State + ").");
+            bool low = command == "low";
+            Refill r = _refills.ReportEmpty(person.CurrentOffice(now), person.EmployeeId, low);
+            Say(person.Name + " reported the " + r.Office + " box " + (low ? "running low" : "empty") + " (" + r.ShortId() + ", " + r.State + ").");
             return;
         }
         if (command == "away")
@@ -106,6 +107,11 @@ public class CommandHandler
         else if (command == "no")
         {
             _refills.Decline(active.Id, person.EmployeeId);
+        }
+        else if (command == "full")
+        {
+            // They looked at the box and it is not empty after all.
+            _refills.Decline(active.Id, person.EmployeeId, boxIsFull: true);
         }
         else if (command == "done" && w.Length >= 2 && decimal.TryParse(w[1], NumberStyles.Number, CultureInfo.InvariantCulture, out decimal amount))
         {
@@ -254,7 +260,7 @@ public class CommandHandler
         Console.WriteLine("  " + text);
     }
 
-    private const string Help = @"<name>: empty | yes | no | done 850 chips, cola | away 5 | visiting oslo 10
+    private const string Help = @"<name>: empty | low | yes | no | full | done 850 chips, cola | away 5 | visiting oslo 10
   <admin>: set budget oslo 7000 300 1200 | set timer accept 45 | set timer complete 24
   hr approve C-1 | hr reject C-1 <reason> | hr down | hr claims
   time +30m | +2h | +3d     status     report     quit";

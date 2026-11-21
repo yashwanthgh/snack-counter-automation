@@ -43,9 +43,11 @@ public class RefillService
         }
     }
 
-    // 1. Anyone reports a box empty. At most ONE open refill per office.
-    public Refill ReportEmpty(Office office, string reportedBy)
+    // 1. Anyone reports a box empty, or running low. Both start a refill the same way.
+    //    At most ONE open refill per office.
+    public Refill ReportEmpty(Office office, string reportedBy, bool runningLow = false)
     {
+        string how = runningLow ? "running low" : "empty";
         lock (_lock)
         {
             DateTimeOffset now = _clock.GetNow();
@@ -54,7 +56,7 @@ public class RefillService
             if (open == null)
             {
                 Refill refill = new Refill(office, now);
-                refill.History.Add(Time(now) + ": " + reportedBy + " reported the box empty");
+                refill.History.Add(Time(now) + ": " + reportedBy + " reported the box " + how);
                 _refills.Add(refill);
                 OfferToNextPerson(refill);
                 if (refill.State == RefillState.Waiting)
@@ -68,7 +70,7 @@ public class RefillService
                 return refill;
             }
 
-            open.History.Add(Time(now) + ": " + reportedBy + " reported it empty again");
+            open.History.Add(Time(now) + ": " + reportedBy + " reported it " + how + " again");
             if (open.State == RefillState.Escalated)
             {
                 // Nobody was available last time. People may be back now, so start the list again.
@@ -77,7 +79,7 @@ public class RefillService
             }
             else if (open.State == RefillState.Committed && open.AssignedTo != null)
             {
-                _chat.SendTo(open.AssignedTo, "The " + office + " box was reported empty again. Still on it? If you can't do it, reply no and someone else will be asked.");
+                _chat.SendTo(open.AssignedTo, "The " + office + " box was reported " + how + " again. Still on it? If you can't do it, reply no and someone else will be asked.");
             }
             return open;
         }
@@ -130,7 +132,8 @@ public class RefillService
 
     // 2b. A volunteer says "no". Ask the next person straight away.
     // Also works after "yes" (Committed): they can't go after all, so nobody waits for the timer.
-    public void Decline(Guid refillId, string employeeId)
+    //     boxIsFull = they checked and the box is NOT empty (a false report): the refill is closed, nobody buys.
+    public void Decline(Guid refillId, string employeeId, bool boxIsFull = false)
     {
         lock (_lock)
         {
@@ -138,6 +141,16 @@ public class RefillService
             bool offered = refill.State == RefillState.Offered;
             bool committed = refill.State == RefillState.Committed;
             if ((!offered && !committed) || refill.AssignedTo != employeeId) return;
+
+            if (boxIsFull)
+            {
+                refill.History.Add(Time(_clock.GetNow()) + ": " + employeeId + " checked the box: it is full, nothing to buy");
+                refill.State = RefillState.NotNeeded;
+                refill.AssignedTo = null;
+                refill.Deadline = null;
+                _chat.SendTo(employeeId, "Thanks for checking! The " + refill.Office + " box is full, so nothing needs to be bought.");
+                return;
+            }
 
             if (committed)
             {

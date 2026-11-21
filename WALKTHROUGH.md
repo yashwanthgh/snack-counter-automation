@@ -37,7 +37,7 @@ The time is Monday 2 Nov, 09:00 UTC.
 
 ### Step 1: Lars types `lars: empty` (`CommandHandler.Handle`)
 - It splits the line at `:` and finds Lars.
-- It sees the word `empty`, works out where Lars is today (Oslo), and calls **`RefillService.ReportEmpty(Oslo, "lars")`**.
+- It sees the word `empty`, works out where Lars is today (Oslo), and calls **`RefillService.ReportEmpty(Oslo, "lars")`**. (Typing `low` instead does the same, with `runningLow: true`, so the history says "running low".)
 
 ### Step 2: `ReportEmpty`
 - **Is there already an open refill for Oslo?**
